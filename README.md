@@ -1,0 +1,1 @@
+A basic score-keeping service for games with endpoints for adding, viewing, and deleting scores.
