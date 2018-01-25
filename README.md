@@ -1,1 +1,1 @@
-A basic score-keeping service for games with endpoints for adding, viewing, and deleting scores.
+A basic score-keeping service for games, written in ASP.NET, with endpoints for adding, viewing, and deleting scores.
