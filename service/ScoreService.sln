@@ -1,9 +1,7 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoreService", "ScoreService.csproj", "{E4BB9A61-7D70-41DE-8888-FCBC2145A30B}"
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoreService", "ScoreService.csproj", "{AEC21822-11B8-4D7F-8D0B-7584F7D04D72}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,12 +9,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E4BB9A61-7D70-41DE-8888-FCBC2145A30B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E4BB9A61-7D70-41DE-8888-FCBC2145A30B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E4BB9A61-7D70-41DE-8888-FCBC2145A30B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E4BB9A61-7D70-41DE-8888-FCBC2145A30B}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
+		{AEC21822-11B8-4D7F-8D0B-7584F7D04D72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEC21822-11B8-4D7F-8D0B-7584F7D04D72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEC21822-11B8-4D7F-8D0B-7584F7D04D72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEC21822-11B8-4D7F-8D0B-7584F7D04D72}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

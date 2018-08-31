@@ -4,16 +4,19 @@
 *--------------------------------------------------------------------------------------------*/
 
 using System;
-using System.ServiceModel.Activation;
-using System.Web.Routing;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
 
 namespace ShowdownSoftware
 {
-    public class Global : System.Web.HttpApplication 
+    public class Program
     {
-        protected void Application_Start(object sender, EventArgs e)
+        public static void Main(string[] args)
         {
-            RouteTable.Routes.Add(new ServiceRoute("scores", new WebServiceHostFactory(), typeof(ScoreService)));
+            WebHost.CreateDefaultBuilder(args)
+                   .UseStartup<Startup>()
+                   .Build()
+                   .Run();
         }
     }
 }

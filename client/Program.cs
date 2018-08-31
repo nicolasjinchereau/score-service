@@ -10,6 +10,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace ScoreClient
 {
@@ -18,6 +19,7 @@ namespace ScoreClient
         public long id;
         public string name;
         public int score;
+        public DateTime date;
     }
 
     public class AddScoreRequest
@@ -28,28 +30,28 @@ namespace ScoreClient
         public int score;
         public DateTime date;
     }
-    
+
     public class AddScoreResponse
     {
         public int status;
         public string message;
         public long scoreId;
     }
-    
+
     public class GetScoresRequest
     {
         public string publicKey;
         public string game;
         public int maxCount;
     }
-    
+
     public class GetScoresResponse
     {
         public int status;
         public string message;
         public List<HighScore> scores;
     }
-    
+
     public class DeleteScoreRequest
     {
         public string privateKey;
@@ -95,7 +97,11 @@ namespace ScoreClient
                     {
                         Console.WriteLine(Help);
                     }
-                    else if(input.StartsWith("add"))
+                    else if (input.StartsWith("info"))
+                    {
+                        Console.WriteLine($"info: {GetInfo()}");
+                    }
+                    else if (input.StartsWith("add"))
                     {
                         var match = Regex.Match(input, @"add\s+(\w*)\s+([0-9]+)");
                         if(match == null)
@@ -104,7 +110,7 @@ namespace ScoreClient
                         var name = match.Groups[1].Value;
                         var score = int.Parse(match.Groups[2].Value);
                         long id = AddScore(name, score);
-                        Console.WriteLine(string.Format("added score: ({0})", id));
+                        Console.WriteLine($"added score: ({id})");
                     }
                     else if(input == "get")
                     {
@@ -112,7 +118,7 @@ namespace ScoreClient
                         Console.WriteLine(" Scores:");
 
                         foreach(var score in scores)
-                            Console.WriteLine(string.Format("  {0}) {1}: {2}", score.id, score.name, score.score));
+                            Console.WriteLine($"  {score.id}) {score.name}: {score.score} - {score.date.ToString("yyyy-MM-dd HH:mm:ss")}");
                     }
                     else if(input.StartsWith("delete"))
                     {
@@ -122,7 +128,7 @@ namespace ScoreClient
 
                         var id = int.Parse(match.Groups[1].Value);
                         DeleteScore(id);
-                        Console.WriteLine(string.Format("deleted score: ({0})", id));
+                        Console.WriteLine($"deleted score: ({id})");
                     }
                     else
                     {
@@ -149,11 +155,16 @@ namespace ScoreClient
             
             string response = PostObject(ServiceURL + "/get", request);
             
-            var obj = JsonReader.Deserialize<GetScoresResponse>(response);
+            var obj = JsonReader.Deserialize<GetScoresResponse>(response, ReaderSettings);
             if(obj.status != 0)
                 throw new Exception(obj.message);
 
             return obj.scores;
+        }
+
+        static string GetInfo()
+        {
+            return GetContent(ServiceURL + "/info");
         }
 
         static long AddScore(string name, int score)
@@ -168,7 +179,7 @@ namespace ScoreClient
             
             string response = PostObject(ServiceURL + "/add", request);
             
-            var obj = JsonReader.Deserialize<AddScoreResponse>(response);
+            var obj = JsonReader.Deserialize<AddScoreResponse>(response, ReaderSettings);
             if(obj.status != 0)
                 throw new Exception(obj.message);
 
@@ -179,31 +190,48 @@ namespace ScoreClient
         {
             var request = new DeleteScoreRequest() {
                 privateKey = PrivateKey,
-                game = "game-name",
+                game = GameName,
                 id = id
             };
             
             string response = PostObject(ServiceURL + "/delete", request);
             
-            var obj = JsonReader.Deserialize<DeleteScoreResponse>(response);
+            var obj = JsonReader.Deserialize<DeleteScoreResponse>(response, ReaderSettings);
             if(obj.status != 0)
                 throw new Exception(obj.message);
         }
 
-        static readonly JsonWriterSettings jsonWriterSettings = new JsonWriterSettings()
+        static readonly JsonWriterSettings WriterSettings = new JsonWriterSettings()
         {
-            DateTimeSerializer = (JsonWriter writer, DateTime dt) =>
-            {
-                var seconds = (int)((dt - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds + 0.5);
-                var offset = new DateTimeOffset(dt).ToString("zzz").Replace(":", "");
-                var msJsonDate = string.Format("/Date({0}{1})/", seconds, offset);
-                writer.Write(msJsonDate);
+            DateTimeSerializer = (JsonWriter writer, DateTime value) => {
+                writer.Write(value.ToString("yyyy-MM-dd HH:mm:ss"));
             }
         };
 
+        static readonly JsonReaderSettings ReaderSettings = new JsonReaderSettings()
+        {
+            DateTimeDeserializer = (JsonReader reader) => {
+                var str = (string)reader.Read(typeof(string), false);
+                return DateTime.Parse(str, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal);
+            }
+        };
+
+        static string GetContent(string url)
+        {
+            var req = WebRequest.CreateHttp(url);
+            req.Method = "GET";
+
+            var response = req.GetResponse() as HttpWebResponse;
+            if (response.StatusCode != HttpStatusCode.OK)
+                throw new Exception("Request failed: " + response.StatusCode);
+
+            var reader = new StreamReader(response.GetResponseStream());
+            return reader.ReadToEnd();
+        }
+
         static string PostObject(string url, object obj)
         {
-            var json = JsonWriter.Serialize(obj, jsonWriterSettings);
+            var json = JsonWriter.Serialize(obj, WriterSettings);
 
             var req = WebRequest.CreateHttp(url);
             req.Method = "POST";
